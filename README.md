@@ -1,3 +1,9 @@
+# About
+
+The plan is to build a crypto bot to automate some trades, but in the course of this project I'll be experimenting using ChatGPT as a copilot to help me think through the project.
+
+[You can view the GPT chat here](https://chatgpt.com/share/59d46294-d036-4a58-9c25-3aae49a7ba09)
+
 # Plan
   - Job one, run hourly:
     - Query the coinmarket cap fear and greed index each day and store the value in a database
