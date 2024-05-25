@@ -4,6 +4,7 @@ The plan is to build a crypto bot to automate some trades, but in the course of 
 
 [You can view the GPT chat here](https://chatgpt.com/share/59d46294-d036-4a58-9c25-3aae49a7ba09)
 
+
 # Plan
   - Job one, run hourly:
     - Query the coinmarket cap fear and greed index each day and store the value in a database
@@ -20,7 +21,7 @@ The plan is to build a crypto bot to automate some trades, but in the course of 
 # Technology Choices
 - Go
 - Postgres
-- Scraping lib: unknown
+- Scraping lib: Colly
 - [modal.com](https://modal.com/) as platform to host cronjobs
 
 # Data sources
