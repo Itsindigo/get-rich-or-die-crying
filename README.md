@@ -7,7 +7,7 @@ The plan is to build a crypto bot to automate some trades, but in the course of 
 
 # Plan
   - Job one, run hourly:
-    - Query the coinmarket cap fear and greed index each day and store the value in a database
+    - Query the coinmarket cap fear and greed index each hour and store the value in a database
   - Job two, run daily:
     - Evaluate whether to buy or sell:
       - If value < MIN_FEAR_SCORE (45?) in last 24 hours, spend all cash in coinbase account on crypto
@@ -21,9 +21,10 @@ The plan is to build a crypto bot to automate some trades, but in the course of 
 # Technology Choices
 - Go
 - Postgres
-- Scraping lib: Colly
-- [modal.com](https://modal.com/) as platform to host cronjobs
+- Colly for scraping
 
 # Data sources
 - Coinbase API (transactions, balances)
 - Coinmarketcap (fear and greed index / market data)
+- [modal.com](https://modal.com/) as platform to host cronjobs
+- Twilio for texts?
