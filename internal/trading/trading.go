@@ -31,6 +31,7 @@ func (tm *TradeMaker) Act() {
 
 	if GreedSellThreshold < tm.FearAndGreedScore {
 		tm.Sell()
+		return
 	}
 }
 
