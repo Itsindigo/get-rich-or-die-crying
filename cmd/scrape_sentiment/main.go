@@ -6,6 +6,7 @@ import (
 
 	"github.com/itsindigo/get-rich-or-die-crying/internal/app_config"
 	"github.com/itsindigo/get-rich-or-die-crying/internal/scraping"
+	"github.com/itsindigo/get-rich-or-die-crying/internal/trading"
 )
 
 func main() {
@@ -20,5 +21,6 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Found score: %d\n", score)
+	tm := trading.NewTradeMaker(score)
+	tm.Act()
 }
