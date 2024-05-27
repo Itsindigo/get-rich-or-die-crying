@@ -9,16 +9,21 @@ import (
 )
 
 type DBConfig struct {
-	DBHost     string `env:"DB_HOST,required"`
-	DBPort     int    `env:"DB_PORT,required"`
-	DBUser     string `env:"DB_USER,required"`
-	DBPassword string `env:"DB_PASSWORD,required"`
-	DBName     string `env:"DB_NAME,required"`
+	Host     string `env:"DB_HOST,required"`
+	Port     int    `env:"DB_PORT,required"`
+	User     string `env:"DB_USER,required"`
+	Password string `env:"DB_PASSWORD,required"`
+	Name     string `env:"DB_NAME,required"`
+}
+
+type CoinbaseConfig struct {
+	ApiKeyName string `env:"CB_API_KEY,required"`
+	Secret     string `env:"CB_API_PRIVAY_KEY,required"`
 }
 
 type AppConfig struct {
-	DB             DBConfig
-	CoinbaseAPIKey string `env:"CB_ACCESS_KEY"`
+	DB       DBConfig
+	Coinbase CoinbaseConfig
 }
 
 func LoadConfig() AppConfig {
@@ -36,12 +41,22 @@ func LoadConfig() AppConfig {
 	return cfg
 }
 
+func obfuscateSecret(s string, reveal_n int) string {
+	if reveal_n > len(s) {
+		return "***"
+	}
+	return fmt.Sprintf("%s***", s[0:reveal_n])
+}
+
 func (c AppConfig) String() string {
 	return fmt.Sprintf(
-		"AppConfig(DB(host: %s, port: %d, user: %s, password: ***, name: %s), CoinbaseAPIKey: ***)",
-		c.DB.DBHost,
-		c.DB.DBPort,
-		c.DB.DBUser,
-		c.DB.DBName,
+		"AppConfig(DB(Host: %s, Port: %d, User: %s, Password: %s Name: %s), Coinbase(ApiKeyName: %s, Secret: %s))",
+		c.DB.Host,
+		c.DB.Port,
+		c.DB.User,
+		obfuscateSecret(c.DB.Password, 3),
+		c.DB.Name,
+		obfuscateSecret(c.Coinbase.ApiKeyName, 3),
+		obfuscateSecret(c.Coinbase.Secret, 5),
 	)
 }

@@ -1,9 +1,25 @@
 package trading
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type TraderAPI interface {
+	Accounts() (interface{}, error)
+}
 
 type TradeMaker struct {
 	FearAndGreedScore int
+	API               TraderAPI
+}
+
+type TradeMakerOptions struct {
+	FearAndGreedScore int
+	API               TraderAPI
+}
+
+func NewTradeMaker(options TradeMakerOptions) *TradeMaker {
+	return &TradeMaker{FearAndGreedScore: options.FearAndGreedScore, API: options.API}
 }
 
 func (tm *TradeMaker) SummariseNoAction() {
@@ -18,23 +34,27 @@ func (tm *TradeMaker) Buy() {
 
 }
 
-func (tm *TradeMaker) Act() {
+func (tm *TradeMaker) Act() error {
+	_, err := tm.API.Accounts()
+
+	if err != nil {
+		return fmt.Errorf("error fetching accounts: %v", err)
+	}
+
 	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
 		tm.SummariseNoAction()
-		return
+		return nil
 	}
 
 	if FearBuyThreshold > tm.FearAndGreedScore {
 		tm.Buy()
-		return
+		return nil
 	}
 
 	if GreedSellThreshold < tm.FearAndGreedScore {
 		tm.Sell()
-		return
+		return nil
 	}
-}
 
-func NewTradeMaker(fearAndGreedScore int) *TradeMaker {
-	return &TradeMaker{FearAndGreedScore: fearAndGreedScore}
+	return nil
 }
