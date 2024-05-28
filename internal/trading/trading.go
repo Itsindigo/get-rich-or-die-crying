@@ -6,6 +6,7 @@ import (
 
 type TraderAPI interface {
 	GetWallets([]string) ([]SimpleAccount, error)
+	CreateOrder() (interface{}, error)
 }
 
 type TradeMaker struct {
@@ -43,6 +44,8 @@ func (tm *TradeMaker) Act() error {
 	}
 
 	fmt.Printf("The Accs: %v", accounts)
+
+	_, err = tm.API.CreateOrder()
 
 	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
 		tm.SummariseNoAction()

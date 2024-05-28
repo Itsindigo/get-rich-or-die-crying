@@ -58,6 +58,7 @@ func (cb *CoinbaseAPI) Request(method string, url string, params interface{}, re
 	if err != nil {
 		return nil, fmt.Errorf("could not create JWT header: %v", err)
 	}
+	fmt.Println(jwt)
 
 	req.Header.Add("Authorization", jwt)
 
