@@ -34,7 +34,7 @@ type AccountsResponse struct {
 	Size     int       `json:"size"`
 }
 
-func (cb *CoinbaseAPI) AccountsRaw() (*AccountsResponse, error) {
+func (cb *CoinbaseAPI) AccountsRaw() (AccountsResponse, error) {
 	var accounts AccountsResponse
 	url := "/accounts"
 	method := "GET"
@@ -42,10 +42,10 @@ func (cb *CoinbaseAPI) AccountsRaw() (*AccountsResponse, error) {
 	_, err := cb.Request(method, url, nil, &accounts)
 
 	if err != nil {
-		return nil, fmt.Errorf("AccountsRaw: %w", err)
+		return AccountsResponse{}, fmt.Errorf("AccountsRaw: %w", err)
 	}
 
-	return &accounts, err
+	return accounts, err
 }
 
 func (ar *AccountsResponse) ToSimpleAccounts(currencies []CoinbaseWalletName) []SimpleAccount {

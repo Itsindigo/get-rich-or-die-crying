@@ -19,7 +19,8 @@ func main() {
 
 	coinbaseAPI := trading.NewCoinbaseAPI(trading.CoinbaseAPIConfig{KeyName: config.Coinbase.ApiKeyName, Secret: config.Coinbase.Secret})
 	tm := trading.NewTradeMaker(trading.TradeMakerOptions{FearAndGreedScore: score, API: coinbaseAPI})
-	err = tm.Act()
+
+	err = tm.Act(trading.ActOptions{ForceSell: true, ForceBuy: false})
 
 	if err != nil {
 		log.Fatalf(err.Error())

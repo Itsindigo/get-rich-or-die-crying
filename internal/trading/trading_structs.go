@@ -19,6 +19,10 @@ type SimpleAccount struct {
 	DeletedAt *time.Time
 }
 
+func (sa SimpleAccount) GoodToTrade() bool {
+	return sa.IsActive && sa.IsReady && sa.DeletedAt == nil
+}
+
 func (sa SimpleAccount) String() string {
 	deletedAtStr := "nil"
 	if sa.DeletedAt != nil {
