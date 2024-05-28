@@ -1,4 +1,4 @@
-package coinbase
+package trading
 
 import (
 	"crypto/rand"

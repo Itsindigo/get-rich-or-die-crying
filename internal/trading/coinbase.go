@@ -1,4 +1,4 @@
-package coinbase
+package trading
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ func NewCoinbaseAPI(coinbaseApiConfig CoinbaseAPIConfig) *CoinbaseAPI {
 	}
 }
 
-func (cb *CoinbaseAPI) Request(method string, url string, params, result interface{}) (res *http.Response, err error) {
+func (cb *CoinbaseAPI) Request(method string, url string, params interface{}, result interface{}) (res *http.Response, err error) {
 	var data []byte
 	body := bytes.NewReader(make([]byte, 0))
 
@@ -48,7 +48,6 @@ func (cb *CoinbaseAPI) Request(method string, url string, params, result interfa
 	req, err := http.NewRequest(method, uri, body)
 
 	if err != nil {
-		fmt.Printf("Err with request: %v", err)
 		return nil, err
 	}
 
@@ -72,16 +71,14 @@ func (cb *CoinbaseAPI) Request(method string, url string, params, result interfa
 
 	if res.StatusCode != 200 {
 		coinbaseError := Error{}
-		decoder := json.NewDecoder(res.Body)
-		if err := decoder.Decode(&coinbaseError); err != nil {
+		if err := json.NewDecoder(res.Body).Decode(&coinbaseError); err != nil {
 			return res, err
 		}
 		return res, error(coinbaseError)
 	}
 
 	if result != nil {
-		decoder := json.NewDecoder(res.Body)
-		if err = decoder.Decode(result); err != nil {
+		if err = json.NewDecoder(res.Body).Decode(result); err != nil {
 			return res, err
 		}
 	}
@@ -97,14 +94,4 @@ func (cb *CoinbaseAPI) getJWTHeader(method, url string) (string, error) {
 	}
 
 	return fmt.Sprintf("Bearer %s", jwt), nil
-}
-
-func (cb *CoinbaseAPI) Accounts() (interface{}, error) {
-	var accounts interface{}
-	url := "/accounts"
-	method := "GET"
-
-	_, err := cb.Request(method, url, nil, &accounts)
-
-	return accounts, err
 }

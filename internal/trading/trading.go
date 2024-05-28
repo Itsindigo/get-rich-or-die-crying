@@ -5,7 +5,7 @@ import (
 )
 
 type TraderAPI interface {
-	Accounts() (interface{}, error)
+	GetWallets([]string) ([]SimpleAccount, error)
 }
 
 type TradeMaker struct {
@@ -35,11 +35,14 @@ func (tm *TradeMaker) Buy() {
 }
 
 func (tm *TradeMaker) Act() error {
-	_, err := tm.API.Accounts()
+	wallets := []string{"ETH Wallet", "BTC Wallet", "GBP Wallet"}
+	accounts, err := tm.API.GetWallets(wallets)
 
 	if err != nil {
-		return fmt.Errorf("error fetching accounts: %v", err)
+		return fmt.Errorf("err: %w", err)
 	}
+
+	fmt.Printf("The Accs: %v", accounts)
 
 	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
 		tm.SummariseNoAction()
