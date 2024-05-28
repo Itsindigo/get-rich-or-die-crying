@@ -2,9 +2,8 @@ package trading
 
 import (
 	"fmt"
+	"slices"
 	"time"
-
-	"github.com/itsindigo/get-rich-or-die-crying/internal/utils"
 )
 
 type Balance struct {
@@ -43,22 +42,20 @@ func (cb *CoinbaseAPI) AccountsRaw() (*AccountsResponse, error) {
 	_, err := cb.Request(method, url, nil, &accounts)
 
 	if err != nil {
-		return nil, fmt.Errorf("accounts request error: %v", err)
+		return nil, fmt.Errorf("AccountsRaw: %w", err)
 	}
 
 	return &accounts, err
 }
 
-func (ar *AccountsResponse) ToSimpleAccounts(currencies []string) []SimpleAccount {
+func (ar *AccountsResponse) ToSimpleAccounts(currencies []CoinbaseWalletName) []SimpleAccount {
 	var simpleAccounts []SimpleAccount
 
 	for _, account := range ar.Accounts {
-		if utils.StringInSlice(account.Name, currencies) {
-			fmt.Println("BALANCE:")
-			fmt.Println(account.AvailableBalance.Value)
+		if slices.Contains(currencies, CoinbaseWalletName(account.Name)) {
 			simpleAccounts = append(simpleAccounts, SimpleAccount{
 				Id:        account.UUID,
-				Name:      account.Name,
+				Name:      CoinbaseWalletName(account.Name),
 				Currency:  account.Currency,
 				Balance:   account.AvailableBalance.Value,
 				Type:      account.Type,
@@ -75,11 +72,11 @@ func (ar *AccountsResponse) ToSimpleAccounts(currencies []string) []SimpleAccoun
 	return simpleAccounts
 }
 
-func (cb *CoinbaseAPI) GetWallets(wallets []string) ([]SimpleAccount, error) {
+func (cb *CoinbaseAPI) GetWallets(wallets []CoinbaseWalletName) ([]SimpleAccount, error) {
 	ar, err := cb.AccountsRaw()
 
 	if err != nil {
-		return nil, fmt.Errorf("error fetching accounts: %v", err)
+		return nil, fmt.Errorf("GetWallets: %w", err)
 	}
 
 	return ar.ToSimpleAccounts(wallets), nil

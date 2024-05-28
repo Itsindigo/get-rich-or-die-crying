@@ -5,10 +5,9 @@ import (
 	"time"
 )
 
-// SimpleAccount represents a simplified account structure
 type SimpleAccount struct {
 	Id        string
-	Name      string
+	Name      CoinbaseWalletName
 	Currency  string
 	IsActive  bool
 	IsDefault bool
