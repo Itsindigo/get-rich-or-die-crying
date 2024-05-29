@@ -13,14 +13,14 @@ func main() {
 	score, err := scraping.ParseSentimentScore()
 
 	if err != nil {
-		log.Fatalf("Could not parse sentiment score: %v\n", err)
+		log.Fatalf(err.Error())
 		return
 	}
 
 	coinbaseAPI := trading.NewCoinbaseAPI(trading.CoinbaseAPIConfig{KeyName: config.Coinbase.ApiKeyName, Secret: config.Coinbase.Secret})
 	tm := trading.NewTradeMaker(trading.TradeMakerOptions{FearAndGreedScore: score, API: coinbaseAPI})
 
-	err = tm.Act(trading.ActOptions{ForceSell: true, ForceBuy: false})
+	err = tm.Act(trading.ActOptions{ForceSell: false, ForceBuy: false})
 
 	if err != nil {
 		log.Fatalf(err.Error())

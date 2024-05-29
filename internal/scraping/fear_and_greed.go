@@ -1,7 +1,6 @@
 package scraping
 
 import (
-	"fmt"
 	"log/slog"
 	"strconv"
 
@@ -19,15 +18,14 @@ func ParseSentimentScore() (int, error) {
 		children := el.DOM.Children().Nodes
 
 		if len(children) == 0 {
-			fmt.Println("Did not find fear and greed index URL element")
+			slog.Warn("Did not find fear and greed index URL element")
 			return
 		}
 
 		// Take first child of first link element:
 		linkElement := children[0]
-
 		if linkElement.FirstChild.Data == "" {
-			fmt.Println("Did not find score text in fear and greed URL")
+			slog.Warn("Did not find score text in fear and greed URL")
 			return
 		}
 
@@ -36,7 +34,7 @@ func ParseSentimentScore() (int, error) {
 
 	c.OnError(func(_ *colly.Response, err error) {
 		if err != nil {
-			fmt.Printf("Collector error %v", err)
+			slog.Error("Collector error", slog.String("error", err.Error()))
 		}
 	})
 
