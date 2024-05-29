@@ -94,7 +94,6 @@ func (tm *TradeMaker) getSaleAmount(balance string) (string, error) {
 }
 
 func (tm *TradeMaker) getPurchaseAmount(balance string) (string, error) {
-
 	floatBalance, err := strconv.ParseFloat(balance, 64)
 
 	if err != nil {
@@ -104,6 +103,7 @@ func (tm *TradeMaker) getPurchaseAmount(balance string) (string, error) {
 	// Spend £0.01 less than balance as sometimes reports insufficient funds at max.
 	floatBalance -= 0.01
 
+	// If balance has gone below zero, return 0.
 	floatBalance = math.Max(floatBalance, 0)
 
 	if floatBalance == 0 {
