@@ -13,14 +13,23 @@ type TraderAPI interface {
 	MarketSell(MarketPair, string) (CreateOrderResponse, error)
 }
 
+type TradeReporter interface {
+	ReportNoAction()
+	ReportSale()
+	ReportBuy()
+	ReportError(error)
+}
+
 type TradeMaker struct {
 	FearAndGreedScore int
 	API               TraderAPI
+	TradeReporter     TradeReporter
 }
 
 type TradeMakerOptions struct {
 	FearAndGreedScore int
 	API               TraderAPI
+	TradeReporter     TradeReporter
 }
 
 type RequiredWallets struct {
@@ -54,10 +63,6 @@ func (tm *TradeMaker) GetEthGbpWallets(wallets []SimpleAccount) (EthGbpWallet, e
 	}
 
 	return walletPair, nil
-}
-
-func (tm *TradeMaker) SummariseNoAction() {
-	fmt.Printf("Today's F&G score was %d, no trade was made.\n", tm.FearAndGreedScore)
 }
 
 func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
@@ -123,16 +128,23 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 		if err != nil {
 			return err
 		}
+		tm.TradeReporter.ReportSale()
 		return nil
 	}
 
 	if FearBuyThreshold >= tm.FearAndGreedScore || options.ForceBuy {
-		tm.BuyEthGbp(walletPair)
+		err := tm.BuyEthGbp(walletPair)
+
+		if err != nil {
+			return err
+		}
+
+		tm.TradeReporter.ReportBuy()
 		return nil
 	}
 
 	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
-		tm.SummariseNoAction()
+		tm.TradeReporter.ReportNoAction()
 		return nil
 	}
 
@@ -140,5 +152,5 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 }
 
 func NewTradeMaker(options TradeMakerOptions) *TradeMaker {
-	return &TradeMaker{FearAndGreedScore: options.FearAndGreedScore, API: options.API}
+	return &TradeMaker{FearAndGreedScore: options.FearAndGreedScore, API: options.API, TradeReporter: options.TradeReporter}
 }
