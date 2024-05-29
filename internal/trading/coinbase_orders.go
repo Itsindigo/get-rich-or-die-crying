@@ -79,8 +79,6 @@ func (cb *CoinbaseAPI) CreateOrder(orderOptions OrderOptions) (CreateOrderRespon
 func (cb *CoinbaseAPI) MarketBuy(productId MarketPair, purchaseAmount string) (CreateOrderResponse, error) {
 	timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
-	fmt.Printf("PURCHASING %s", purchaseAmount)
-
 	order, err := cb.CreateOrder(
 		OrderOptions{
 			ClientOrderId: timestamp,

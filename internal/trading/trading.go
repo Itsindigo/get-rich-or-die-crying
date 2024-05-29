@@ -69,14 +69,14 @@ func (tm *TradeMaker) GetEthGbpWallets(wallets []SimpleAccount) (EthGbpWallet, e
 
 func (tm *TradeMaker) getSaleAmount(val float64) string {
 	if tm.MakeMinTrades {
-		return "0.00001"
+		return "0.00010" // Approx £0.10 - £0.20
 	}
 	return fmt.Sprintf("%.5f", val)
 }
 
 func (tm *TradeMaker) getPurchaseAmount(val float64) string {
 	if tm.MakeMinTrades {
-		return "1.0"
+		return "1.00" // £1.00
 	}
 	return fmt.Sprintf("%.2f", val)
 }
@@ -120,15 +120,13 @@ func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
 
 	purchaseAmount := tm.getPurchaseAmount(floatBalance)
 
-	fmt.Printf("FLOAT BAL: %.5f --- Amount: %q\n", floatBalance, purchaseAmount)
-
 	_, err = tm.API.MarketBuy(ETH_GBP, purchaseAmount)
 
 	if err != nil {
 		return err
 	}
 
-	slog.Info("Bought ETH", slog.String("total", purchaseAmount))
+	slog.Info("Bought ETH", slog.String("GBP-spent", purchaseAmount))
 
 	return nil
 }
@@ -139,6 +137,10 @@ type ActOptions struct {
 }
 
 func (tm *TradeMaker) Act(options ActOptions) error {
+	if options.ForceSell && options.ForceBuy {
+		return errors.New("ForceSell and ForceBuy are both true, does not make sense to trade when both are true")
+	}
+
 	walletsToQuery := []CoinbaseWalletName{ETHWallet, GBPWallet}
 	wallets, err := tm.API.GetWallets(walletsToQuery)
 

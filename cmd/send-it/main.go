@@ -21,20 +21,20 @@ func main() {
 		return
 	}
 
-	coinbaseAPI := trading.NewCoinbaseAPI(trading.CoinbaseAPIConfig{KeyName: config.Coinbase.ApiKeyName, Secret: config.Coinbase.Secret})
 	tradeReporter := reporting.NewTradeReporter()
 	tm := trading.NewTradeMaker(
 		trading.TradeMakerOptions{
 			FearAndGreedScore: score,
 			MakeMinTrades:     config.ShouldMakeMinTrades,
-			API:               coinbaseAPI,
-			TradeReporter:     tradeReporter,
+			API: trading.NewCoinbaseAPI(
+				trading.CoinbaseAPIConfig{
+					KeyName: config.Coinbase.ApiKeyName,
+					Secret:  config.Coinbase.Secret,
+				},
+			),
+			TradeReporter: tradeReporter,
 		},
 	)
-
-	if config.ForceSell && config.ForceBuy {
-		log.Fatalf("ForceSell and ForceBuy are both true. Does not make sense to trade when both are true.")
-	}
 
 	err = tm.Act(trading.ActOptions{ForceSell: config.ForceSell, ForceBuy: config.ForceBuy})
 
