@@ -9,7 +9,7 @@ import (
 
 type TraderAPI interface {
 	GetWallets([]CoinbaseWalletName) ([]SimpleAccount, error)
-	MarketBuy() (interface{}, error)
+	MarketBuy(MarketPair, string) (CreateOrderResponse, error)
 	MarketSell(MarketPair, string) (CreateOrderResponse, error)
 }
 
@@ -20,13 +20,13 @@ type TradeReporter interface {
 	ReportError(error)
 }
 
-type TradeMaker struct {
+type TradeMakerOptions struct {
 	FearAndGreedScore int
 	API               TraderAPI
 	TradeReporter     TradeReporter
 }
 
-type TradeMakerOptions struct {
+type TradeMaker struct {
 	FearAndGreedScore int
 	API               TraderAPI
 	TradeReporter     TradeReporter
@@ -73,7 +73,7 @@ func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
 	}
 
 	if floatBalance == 0 {
-		return errors.New("SellEthGbp: cannot sell ETH as balance is 0")
+		return errors.New("SellEthGbp: cannot sell ETH as ETH balance is 0")
 	}
 
 	saleAmount := fmt.Sprintf("%.5f", floatBalance)
@@ -90,16 +90,25 @@ func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
 }
 
 func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
-	floatBalance, err := strconv.ParseFloat(walletPair.Eth.Balance, 64)
+	floatBalance, err := strconv.ParseFloat(walletPair.Gbp.Balance, 64)
 
 	if err != nil {
 		return err
 	}
 
 	if floatBalance == 0 {
-		return errors.New("BuyEthGbp: cannot sell GBP as balance is 0")
+		return errors.New("BuyEthGbp: cannot buy ETH as GBP balance is 0")
 	}
-	_, _ = tm.API.MarketBuy()
+
+	purchaseAmount := fmt.Sprintf("%.2f", floatBalance)
+
+	_, err = tm.API.MarketBuy(ETH_GBP, purchaseAmount)
+
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Bought ETH", slog.String("total", purchaseAmount))
 
 	return nil
 }

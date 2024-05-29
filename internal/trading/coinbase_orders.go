@@ -76,8 +76,27 @@ func (cb *CoinbaseAPI) CreateOrder(orderOptions OrderOptions) (CreateOrderRespon
 	return order, nil
 }
 
-func (cb *CoinbaseAPI) MarketBuy() (interface{}, error) {
-	return nil, nil
+func (cb *CoinbaseAPI) MarketBuy(productId MarketPair, purchaseAmount string) (CreateOrderResponse, error) {
+	timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+
+	order, err := cb.CreateOrder(
+		OrderOptions{
+			ClientOrderId: timestamp,
+			ProductId:     productId,
+			Side:          TradeSide("BUY"),
+			OrderConfiguration: OrderConfiguration{
+				MarketMarketIOC: MarketMarketIOC{
+					QuoteSize: purchaseAmount,
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		return CreateOrderResponse{}, fmt.Errorf("MarketSell - %w", err)
+	}
+
+	return order, nil
 }
 
 type OrderOptions struct {
@@ -94,7 +113,7 @@ func (cb *CoinbaseAPI) MarketSell(productId MarketPair, saleAmount string) (Crea
 		OrderOptions{
 			ClientOrderId: timestamp,
 			ProductId:     productId,
-			Side:          "SELL",
+			Side:          TradeSide("SELL"),
 			OrderConfiguration: OrderConfiguration{
 				MarketMarketIOC: MarketMarketIOC{
 					BaseSize: saleAmount,
