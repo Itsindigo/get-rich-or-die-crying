@@ -94,21 +94,21 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 		return err
 	}
 
-	if !options.ForceSell && !options.ForceBuy && (FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore) {
-		tm.SummariseNoAction()
-		return nil
-	}
-
-	if FearBuyThreshold > tm.FearAndGreedScore || options.ForceBuy {
-		tm.BuyEthGbp(walletPair)
-		return nil
-	}
-
-	if GreedSellThreshold < tm.FearAndGreedScore || options.ForceSell {
+	if GreedSellThreshold <= tm.FearAndGreedScore || options.ForceSell {
 		err := tm.SellEthGbp(walletPair)
 		if err != nil {
 			return err
 		}
+		return nil
+	}
+
+	if FearBuyThreshold >= tm.FearAndGreedScore || options.ForceBuy {
+		tm.BuyEthGbp(walletPair)
+		return nil
+	}
+
+	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
+		tm.SummariseNoAction()
 		return nil
 	}
 
