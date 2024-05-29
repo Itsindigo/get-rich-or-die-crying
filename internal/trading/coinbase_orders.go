@@ -64,6 +64,7 @@ func (cb *CoinbaseAPI) CreateOrder(orderOptions OrderOptions) (CreateOrderRespon
 	}
 
 	if order.ErrorResponse != nil {
+		fmt.Printf("Order: %#v", order)
 		errors := []ErrorWithLabel{
 			{Label: "type", Error: order.ErrorResponse.Error},
 			{Label: "message", Error: order.ErrorResponse.Message},
