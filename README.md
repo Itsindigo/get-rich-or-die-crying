@@ -8,7 +8,7 @@ This repo is a project for automating crypto trades via [coinbase.com](https://c
 ![Job Design Diagram](./docs/diagram.png)
 
 
-# Technology Choices
+## Technology Choices
 - Go
 - Colly for scraping
 - Coinbase Advanced Trade API
