@@ -32,7 +32,11 @@ func main() {
 		},
 	)
 
-	err = tm.Act(trading.ActOptions{ForceSell: false, ForceBuy: false})
+	if config.ForceSell && config.ForceBuy {
+		log.Fatalf("ForceSell and ForceBuy are both true. Does not make sense to trade when both are true.")
+	}
+
+	err = tm.Act(trading.ActOptions{ForceSell: config.ForceSell, ForceBuy: config.ForceBuy})
 
 	if err != nil {
 		tradeReporter.ReportError(err)
