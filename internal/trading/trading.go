@@ -3,6 +3,7 @@ package trading
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 )
 
@@ -70,13 +71,16 @@ func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
 		return errors.New("SellEthGbp: cannot sell ETH as balance is 0")
 	}
 
-	_, err = tm.API.MarketSell(ETH_GBP, walletPair.Eth.Balance)
+	saleAmount := fmt.Sprintf("%.5f", floatBalance)
+
+	_, err = tm.API.MarketSell(ETH_GBP, saleAmount)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("ETH order placed")
+	slog.Info("Sold ETH", slog.String("total", saleAmount))
+
 	return nil
 }
 

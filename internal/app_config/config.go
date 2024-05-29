@@ -38,8 +38,6 @@ func LoadConfig() AppConfig {
 		log.Fatalf("Error mounting config: %v", err)
 	}
 
-	fmt.Printf("Config: %v\n", cfg)
-
 	return cfg
 }
 

@@ -87,7 +87,7 @@ type OrderOptions struct {
 	OrderConfiguration OrderConfiguration `json:"order_configuration"`
 }
 
-func (cb *CoinbaseAPI) MarketSell(productId MarketPair, cryptoAmount string) (CreateOrderResponse, error) {
+func (cb *CoinbaseAPI) MarketSell(productId MarketPair, saleAmount string) (CreateOrderResponse, error) {
 	timestamp := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
 	order, err := cb.CreateOrder(
@@ -97,7 +97,7 @@ func (cb *CoinbaseAPI) MarketSell(productId MarketPair, cryptoAmount string) (Cr
 			Side:          "SELL",
 			OrderConfiguration: OrderConfiguration{
 				MarketMarketIOC: MarketMarketIOC{
-					BaseSize: cryptoAmount,
+					BaseSize: saleAmount,
 				},
 			},
 		},

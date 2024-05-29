@@ -2,6 +2,7 @@ package scraping
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -54,6 +55,8 @@ func ParseSentimentScore() (int, error) {
 	if err != nil {
 		return 0, ScoreParseError{Value: htmlScore}
 	}
+
+	slog.Info("Parsed Fear & Greed Sentiment Score", slog.Int("score", score))
 
 	return score, nil
 }
