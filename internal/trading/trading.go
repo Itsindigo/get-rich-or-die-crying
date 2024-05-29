@@ -24,12 +24,14 @@ type TradeMakerOptions struct {
 	FearAndGreedScore int
 	API               TraderAPI
 	TradeReporter     TradeReporter
+	MakeMinTrades     bool
 }
 
 type TradeMaker struct {
 	FearAndGreedScore int
 	API               TraderAPI
 	TradeReporter     TradeReporter
+	MakeMinTrades     bool
 }
 
 type RequiredWallets struct {
@@ -65,6 +67,20 @@ func (tm *TradeMaker) GetEthGbpWallets(wallets []SimpleAccount) (EthGbpWallet, e
 	return walletPair, nil
 }
 
+func (tm *TradeMaker) getSaleAmount(val float64) string {
+	if tm.MakeMinTrades {
+		return "0.00001"
+	}
+	return fmt.Sprintf("%.5f", val)
+}
+
+func (tm *TradeMaker) getPurchaseAmount(val float64) string {
+	if tm.MakeMinTrades {
+		return "1.0"
+	}
+	return fmt.Sprintf("%.2f", val)
+}
+
 func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
 	floatBalance, err := strconv.ParseFloat(walletPair.Eth.Balance, 64)
 
@@ -76,7 +92,9 @@ func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
 		return errors.New("SellEthGbp: cannot sell ETH as ETH balance is 0")
 	}
 
-	saleAmount := fmt.Sprintf("%.5f", floatBalance)
+	saleAmount := tm.getSaleAmount(floatBalance)
+
+	fmt.Printf("FB: %.5f --- SA: %s\n", floatBalance, saleAmount)
 
 	_, err = tm.API.MarketSell(ETH_GBP, saleAmount)
 
@@ -100,7 +118,9 @@ func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
 		return errors.New("BuyEthGbp: cannot buy ETH as GBP balance is 0")
 	}
 
-	purchaseAmount := fmt.Sprintf("%.2f", floatBalance)
+	purchaseAmount := tm.getPurchaseAmount(floatBalance)
+
+	fmt.Printf("FLOAT BAL: %.5f --- Amount: %q\n", floatBalance, purchaseAmount)
 
 	_, err = tm.API.MarketBuy(ETH_GBP, purchaseAmount)
 
@@ -161,5 +181,10 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 }
 
 func NewTradeMaker(options TradeMakerOptions) *TradeMaker {
-	return &TradeMaker{FearAndGreedScore: options.FearAndGreedScore, API: options.API, TradeReporter: options.TradeReporter}
+	return &TradeMaker{
+		FearAndGreedScore: options.FearAndGreedScore,
+		MakeMinTrades:     options.MakeMinTrades,
+		API:               options.API,
+		TradeReporter:     options.TradeReporter,
+	}
 }

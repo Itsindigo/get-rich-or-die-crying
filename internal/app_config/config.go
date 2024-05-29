@@ -22,8 +22,9 @@ type CoinbaseConfig struct {
 }
 
 type AppConfig struct {
-	DB       DBConfig
-	Coinbase CoinbaseConfig
+	DB                  DBConfig
+	Coinbase            CoinbaseConfig
+	ShouldMakeMinTrades bool `env:"SHOULD_MAKE_MIN_TRADES"`
 }
 
 func LoadConfig() AppConfig {
@@ -50,7 +51,7 @@ func obfuscateSecret(s string, reveal_n int) string {
 
 func (c AppConfig) String() string {
 	return fmt.Sprintf(
-		"AppConfig(DB(Host: %s, Port: %d, User: %s, Password: %s Name: %s), Coinbase(ApiKeyName: %s, Secret: %s))",
+		"AppConfig(DB(Host: %s, Port: %d, User: %s, Password: %s Name: %s), Coinbase(ApiKeyName: %s, Secret: %s), ShouldMakeMinTrades: %t)",
 		c.DB.Host,
 		c.DB.Port,
 		c.DB.User,
@@ -58,5 +59,6 @@ func (c AppConfig) String() string {
 		c.DB.Name,
 		obfuscateSecret(c.Coinbase.ApiKeyName, 3),
 		obfuscateSecret(c.Coinbase.Secret, 5),
+		c.ShouldMakeMinTrades,
 	)
 }
