@@ -7,8 +7,8 @@ import (
 )
 
 type Balance struct {
-	Currency string  `json:"currency"`
-	Value    float64 `json:"value,string"`
+	Currency string `json:"currency"`
+	Value    string `json:"value"`
 }
 
 type Account struct {
@@ -27,28 +27,28 @@ type Account struct {
 	UUID              string     `json:"uuid"`
 }
 
-type AccountsResponse struct {
+type GetAccountsResponse struct {
 	Accounts []Account `json:"accounts"`
 	Cursor   string    `json:"cursor"`
 	HasNext  bool      `json:"has_next"`
 	Size     int       `json:"size"`
 }
 
-func (cb *CoinbaseAPI) AccountsRaw() (AccountsResponse, error) {
-	var accounts AccountsResponse
+func (cb *CoinbaseAPI) AccountsRaw() (GetAccountsResponse, error) {
+	var accounts GetAccountsResponse
 	url := "/accounts"
 	method := "GET"
 
 	_, err := cb.Request(method, url, nil, &accounts)
 
 	if err != nil {
-		return AccountsResponse{}, fmt.Errorf("AccountsRaw: %w", err)
+		return GetAccountsResponse{}, fmt.Errorf("AccountsRaw: %w", err)
 	}
 
 	return accounts, err
 }
 
-func (ar *AccountsResponse) ToSimpleAccounts(currencies []CoinbaseWalletName) []SimpleAccount {
+func (ar *GetAccountsResponse) ToSimpleAccounts(currencies []CoinbaseWalletName) []SimpleAccount {
 	var simpleAccounts []SimpleAccount
 
 	for _, account := range ar.Accounts {

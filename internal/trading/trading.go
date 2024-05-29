@@ -3,12 +3,13 @@ package trading
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 type TraderAPI interface {
 	GetWallets([]CoinbaseWalletName) ([]SimpleAccount, error)
 	MarketBuy() (interface{}, error)
-	MarketSell() (interface{}, error)
+	MarketSell(MarketPair, string) (CreateOrderResponse, error)
 }
 
 type TradeMaker struct {
@@ -59,15 +60,34 @@ func (tm *TradeMaker) SummariseNoAction() {
 }
 
 func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
-	if walletPair.Eth.Balance == 0 {
+	floatBalance, err := strconv.ParseFloat(walletPair.Eth.Balance, 64)
+
+	if err != nil {
+		return err
+	}
+
+	if floatBalance == 0 {
 		return errors.New("SellEthGbp: cannot sell ETH as balance is 0")
 	}
-	_, _ = tm.API.MarketSell()
+
+	_, err = tm.API.MarketSell(ETH_GBP, walletPair.Eth.Balance)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("ETH order placed")
 	return nil
 }
 
 func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
-	if walletPair.Gbp.Balance == 0 {
+	floatBalance, err := strconv.ParseFloat(walletPair.Eth.Balance, 64)
+
+	if err != nil {
+		return err
+	}
+
+	if floatBalance == 0 {
 		return errors.New("BuyEthGbp: cannot sell GBP as balance is 0")
 	}
 	_, _ = tm.API.MarketBuy()

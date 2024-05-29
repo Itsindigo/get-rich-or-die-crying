@@ -13,7 +13,7 @@ type SimpleAccount struct {
 	IsDefault bool
 	IsReady   bool
 	Type      string
-	Balance   float64
+	Balance   string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time
@@ -38,7 +38,7 @@ func (sa SimpleAccount) String() string {
 			"  IsDefault: %t\n"+
 			"  IsReady: %t\n"+
 			"  Type: %s\n"+
-			"  Balance: %.8f\n"+
+			"  Balance: %s\n"+
 			"  CreatedAt: %s\n"+
 			"  UpdatedAt: %s\n"+
 			"  DeletedAt: %s\n"+
