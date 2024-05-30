@@ -1,7 +1,7 @@
 package trading
 
 var FearBuyThreshold int = 45
-var GreedSellThreshold int = 85
+var GreedSellThreshold int = 82
 
 type CoinbaseWalletName string
 
