@@ -13,5 +13,5 @@ This repo is a project for automating crypto trades via [coinbase.com](https://c
 - Colly for scraping
 - Coinbase Advanced Trade API
 - [modal.com](https://modal.com/) as platform to host cronjobs
-- Twilio for texts?
+- Slack API for notifications
 
