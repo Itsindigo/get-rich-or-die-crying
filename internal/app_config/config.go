@@ -14,14 +14,14 @@ type CoinbaseConfig struct {
 	Secret     string `env:"CB_API_PRIVACY_KEY,required"`
 }
 
-type KnockConfig struct {
-	Secret string `env:"KNOCK_SECRET_KEY,required"`
+type SlackConfig struct {
+	WebhookID string `env:"SLACK_WEBHOOK_ID,required"`
 }
 
 type AppConfig struct {
 	EnableDebugLogs     bool `env:"ENABLE_DEBUG_LOGS"`
 	Coinbase            CoinbaseConfig
-	Knock               KnockConfig
+	Slack               SlackConfig
 	ShouldMakeMinTrades bool `env:"SHOULD_MAKE_MIN_TRADES"`
 	ForceSell           bool `env:"FORCE_SELL"`
 	ForceBuy            bool `env:"FORCE_BUY"`
@@ -55,11 +55,11 @@ func obfuscateSecret(s string, reveal_n int) string {
 
 func (c AppConfig) String() string {
 	return fmt.Sprintf(
-		"AppConfig(EnableDebugLogs: %t, Coinbase(ApiKeyName: %s, Secret: %s), Knock(Secret: %s) ShouldMakeMinTrades: %t, ForceSell: %t, ForceBuy: %t)",
+		"AppConfig(EnableDebugLogs: %t, Coinbase(ApiKeyName: %s, Secret: %s), Slack(WebhookID: %s) ShouldMakeMinTrades: %t, ForceSell: %t, ForceBuy: %t)",
 		c.EnableDebugLogs,
 		obfuscateSecret(c.Coinbase.ApiKeyName, 3),
 		obfuscateSecret(c.Coinbase.Secret, 5),
-		obfuscateSecret(c.Knock.Secret, 12),
+		obfuscateSecret(c.Slack.WebhookID, 12),
 		c.ShouldMakeMinTrades,
 		c.ForceSell,
 		c.ForceBuy,

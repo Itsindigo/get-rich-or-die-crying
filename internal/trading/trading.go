@@ -1,6 +1,7 @@
 package trading
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,24 +16,22 @@ type TraderAPI interface {
 }
 
 type TradeReporter interface {
-	ReportNoAction()
-	ReportSale()
-	ReportBuy()
-	ReportError(error)
+	ReportNoAction(context.Context, int) error
+	ReportSale(context.Context)
+	ReportBuy(context.Context)
+	ReportError(context.Context, error)
 }
 
 type TradeMakerOptions struct {
-	FearAndGreedScore int
-	API               TraderAPI
-	TradeReporter     TradeReporter
-	MakeMinTrades     bool
+	API           TraderAPI
+	TradeReporter TradeReporter
+	MakeMinTrades bool
 }
 
 type TradeMaker struct {
-	FearAndGreedScore int
-	API               TraderAPI
-	TradeReporter     TradeReporter
-	MakeMinTrades     bool
+	API           TraderAPI
+	TradeReporter TradeReporter
+	MakeMinTrades bool
 }
 
 type RequiredWallets struct {
@@ -154,11 +153,12 @@ func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
 }
 
 type ActOptions struct {
-	ForceSell bool
-	ForceBuy  bool
+	ForceSell         bool
+	ForceBuy          bool
+	FearAndGreedScore int
 }
 
-func (tm *TradeMaker) Act(options ActOptions) error {
+func (tm *TradeMaker) Act(ctx context.Context, options ActOptions) error {
 	if options.ForceSell && options.ForceBuy {
 		return errors.New("ForceSell and ForceBuy are both true, does not make sense to trade when both are true")
 	}
@@ -176,28 +176,33 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 		return err
 	}
 
-	if GreedSellThreshold <= tm.FearAndGreedScore || options.ForceSell {
+	if GreedSellThreshold <= options.FearAndGreedScore || options.ForceSell {
 		err := tm.SellEthGbp(walletPair)
 		if err != nil {
 			return err
 		}
-		tm.TradeReporter.ReportSale()
+		tm.TradeReporter.ReportSale(ctx)
 		return nil
 	}
 
-	if FearBuyThreshold >= tm.FearAndGreedScore || options.ForceBuy {
+	if FearBuyThreshold >= options.FearAndGreedScore || options.ForceBuy {
 		err := tm.BuyEthGbp(walletPair)
 
 		if err != nil {
 			return err
 		}
 
-		tm.TradeReporter.ReportBuy()
+		tm.TradeReporter.ReportBuy(ctx)
 		return nil
 	}
 
-	if FearBuyThreshold < tm.FearAndGreedScore && GreedSellThreshold > tm.FearAndGreedScore {
-		tm.TradeReporter.ReportNoAction()
+	if FearBuyThreshold < options.FearAndGreedScore && GreedSellThreshold > options.FearAndGreedScore {
+		err := tm.TradeReporter.ReportNoAction(ctx, options.FearAndGreedScore)
+
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
 
@@ -206,9 +211,8 @@ func (tm *TradeMaker) Act(options ActOptions) error {
 
 func NewTradeMaker(options TradeMakerOptions) *TradeMaker {
 	return &TradeMaker{
-		FearAndGreedScore: options.FearAndGreedScore,
-		MakeMinTrades:     options.MakeMinTrades,
-		API:               options.API,
-		TradeReporter:     options.TradeReporter,
+		MakeMinTrades: options.MakeMinTrades,
+		API:           options.API,
+		TradeReporter: options.TradeReporter,
 	}
 }
