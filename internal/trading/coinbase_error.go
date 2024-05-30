@@ -35,5 +35,5 @@ func (e CreateOrderError) Error() string {
 		}
 	}
 
-	return fmt.Sprintf("failed to create coinbase order: { %s }", strings.Join(errors, ", "))
+	return fmt.Sprintf("failed to create coinbase order: `{ %s }`", strings.Join(errors, ", "))
 }

@@ -53,8 +53,6 @@ func (s *Slack) SendMessage(ctx context.Context, blocks Blocks) (string, error) 
 
 	data, err := json.Marshal(blocks)
 
-	fmt.Println(string(data))
-
 	if err != nil {
 		return "", err
 	}

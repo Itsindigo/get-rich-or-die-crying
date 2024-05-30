@@ -17,9 +17,9 @@ type TraderAPI interface {
 
 type TradeReporter interface {
 	ReportNoAction(context.Context, int) error
-	ReportSale(context.Context)
-	ReportBuy(context.Context)
-	ReportError(context.Context, error)
+	ReportSale(context.Context, string) error
+	ReportPurchase(context.Context, string) error
+	ReportError(context.Context, error) error
 }
 
 type TradeMakerOptions struct {
@@ -82,7 +82,7 @@ func (tm *TradeMaker) getSaleAmount(balance string) (string, error) {
 	floatBalance = math.Max(floatBalance, 0)
 
 	if floatBalance == 0 {
-		return "", errors.New("SellEthGbp: cannot sell ETH due to insufficient ETH")
+		return "", errors.New("`SellEthGbp` cannot sell ETH due to insufficient balance")
 	}
 
 	if tm.MakeMinTrades {
@@ -95,6 +95,9 @@ func (tm *TradeMaker) getSaleAmount(balance string) (string, error) {
 func (tm *TradeMaker) getPurchaseAmount(balance string) (string, error) {
 	floatBalance, err := strconv.ParseFloat(balance, 64)
 
+	// £1.00 seems to be min trade amount Coinbase will allow.
+	minTradeAmount := 1.00
+
 	if err != nil {
 		return "", err
 	}
@@ -105,51 +108,51 @@ func (tm *TradeMaker) getPurchaseAmount(balance string) (string, error) {
 	// If balance has gone below zero, return 0.
 	floatBalance = math.Max(floatBalance, 0)
 
-	if floatBalance == 0 {
-		return "", errors.New("BuyEthGbp: cannot buy ETH due to insufficient GBP")
+	if floatBalance == 0 || floatBalance < minTradeAmount {
+		return "", errors.New("`BuyEthGbp` cannot buy ETH due to insufficient GBP")
 	}
 
 	if tm.MakeMinTrades {
-		return "1.00", nil // £1.00 seems to be min trade amount Coinbase will allow.
+		return strconv.FormatFloat(minTradeAmount, 'f', 2, 64), nil
 	}
 
 	return fmt.Sprintf("%.2f", floatBalance), nil
 }
 
-func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) error {
+func (tm *TradeMaker) SellEthGbp(walletPair EthGbpWallet) (string, error) {
 	saleAmount, err := tm.getSaleAmount(walletPair.Eth.Balance)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = tm.API.MarketSell(ETH_GBP, saleAmount)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	slog.Info("Sold ETH", slog.String("ETH-sold", saleAmount))
 
-	return nil
+	return saleAmount, nil
 }
 
-func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) error {
+func (tm *TradeMaker) BuyEthGbp(walletPair EthGbpWallet) (string, error) {
 	purchaseAmount, err := tm.getPurchaseAmount(walletPair.Gbp.Balance)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = tm.API.MarketBuy(ETH_GBP, purchaseAmount)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	slog.Info("Bought ETH", slog.String("GBP-spent", purchaseAmount))
 
-	return nil
+	return purchaseAmount, nil
 }
 
 type ActOptions struct {
@@ -160,7 +163,7 @@ type ActOptions struct {
 
 func (tm *TradeMaker) Act(ctx context.Context, options ActOptions) error {
 	if options.ForceSell && options.ForceBuy {
-		return errors.New("ForceSell and ForceBuy are both true, does not make sense to trade when both are true")
+		return errors.New("`ForceSell` and `ForceBuy` are both set to `true`, does not make sense to trade when both are true")
 	}
 
 	walletsToQuery := []CoinbaseWalletName{ETHWallet, GBPWallet}
@@ -177,22 +180,22 @@ func (tm *TradeMaker) Act(ctx context.Context, options ActOptions) error {
 	}
 
 	if GreedSellThreshold <= options.FearAndGreedScore || options.ForceSell {
-		err := tm.SellEthGbp(walletPair)
+		saleAmount, err := tm.SellEthGbp(walletPair)
 		if err != nil {
 			return err
 		}
-		tm.TradeReporter.ReportSale(ctx)
+		tm.TradeReporter.ReportSale(ctx, saleAmount)
 		return nil
 	}
 
 	if FearBuyThreshold >= options.FearAndGreedScore || options.ForceBuy {
-		err := tm.BuyEthGbp(walletPair)
+		purchaseAmount, err := tm.BuyEthGbp(walletPair)
 
 		if err != nil {
 			return err
 		}
 
-		tm.TradeReporter.ReportBuy(ctx)
+		tm.TradeReporter.ReportPurchase(ctx, purchaseAmount)
 		return nil
 	}
 

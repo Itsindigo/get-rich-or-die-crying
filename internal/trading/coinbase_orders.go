@@ -94,7 +94,7 @@ func (cb *CoinbaseAPI) MarketBuy(productId MarketPair, purchaseAmount string) (C
 	)
 
 	if err != nil {
-		return CreateOrderResponse{}, fmt.Errorf("MarketSell - %w", err)
+		return CreateOrderResponse{}, fmt.Errorf("MarketBuy - %w", err)
 	}
 
 	return order, nil
