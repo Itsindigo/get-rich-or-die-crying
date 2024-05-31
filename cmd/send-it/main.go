@@ -14,7 +14,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	config := app_config.LoadConfig()
+	config := app_config.ConfigureApp()
 	slog.Debug("Config", slog.String("config", config.String()))
 
 	slackClient := slack.NewSlack(config.Slack.WebhookID)

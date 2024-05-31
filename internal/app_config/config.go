@@ -1,9 +1,11 @@
 package app_config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
@@ -11,7 +13,7 @@ import (
 
 type CoinbaseConfig struct {
 	ApiKeyName string `env:"CB_API_KEY,required"`
-	Secret     string `env:"CB_API_PRIVACY_KEY,required"`
+	Secret     string `env:"CB_API_PRIVACY_KEY_B64,required"`
 }
 
 type SlackConfig struct {
@@ -27,17 +29,35 @@ type AppConfig struct {
 	ForceBuy            bool `env:"FORCE_BUY"`
 }
 
-func LoadConfig() AppConfig {
-	err := godotenv.Load()
+func b64DecodeConfigVar(str string, fieldName string) string {
+	decoded, err := base64.StdEncoding.DecodeString(str)
+
+	slog.Info("Decode Val:", slog.String("str", str))
 
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatalf("Could not decode %q: %s", fieldName, err.Error())
+	}
+
+	return string(decoded)
+}
+
+func ConfigureApp() AppConfig {
+	if os.Getenv("IS_REMOTE_ENVIRONMENT") == "" {
+		err := godotenv.Load()
+
+		if err != nil {
+			log.Fatalf("Error loading .env file: %v", err)
+		}
 	}
 
 	cfg := AppConfig{}
-	if err := env.Parse(&cfg); err != nil {
+	err := env.Parse(&cfg)
+
+	if err != nil {
 		log.Fatalf("Error mounting config: %v", err)
 	}
+
+	cfg.Coinbase.Secret = b64DecodeConfigVar(cfg.Coinbase.Secret, "cfg.Coinbase.Secret")
 
 	if cfg.EnableDebugLogs {
 		slog.SetLogLoggerLevel(slog.LevelDebug)

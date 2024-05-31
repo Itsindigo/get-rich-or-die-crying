@@ -27,7 +27,7 @@ func (s *Slack) request(method string, url string, body io.Reader, result *strin
 	res, err = s.HTTPClient.Do(req)
 
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
 	defer res.Body.Close()
