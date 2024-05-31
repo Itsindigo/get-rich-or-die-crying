@@ -32,8 +32,6 @@ type AppConfig struct {
 func b64DecodeConfigVar(str string, fieldName string) string {
 	decoded, err := base64.StdEncoding.DecodeString(str)
 
-	slog.Info("Decode Val:", slog.String("str", str))
-
 	if err != nil {
 		log.Fatalf("Could not decode %q: %s", fieldName, err.Error())
 	}
