@@ -16,9 +16,7 @@ type CoinbaseSecret []byte
 func (p *CoinbaseSecret) UnmarshalText(text []byte) error {
 	out, err := base64.StdEncoding.DecodeString(string(text))
 	if err != nil {
-		if err != nil {
-			log.Fatalf("Could not decode CoinbaseSecret: %s", err.Error())
-		}
+		log.Fatalf("Could not decode CoinbaseSecret: %s", err.Error())
 	}
 	*p = out
 	return nil
