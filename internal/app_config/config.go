@@ -11,9 +11,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type CoinbaseSecret []byte
+
+func (p *CoinbaseSecret) UnmarshalText(text []byte) error {
+	out, err := base64.StdEncoding.DecodeString(string(text))
+	if err != nil {
+		if err != nil {
+			log.Fatalf("Could not decode CoinbaseSecret: %s", err.Error())
+		}
+	}
+	*p = out
+	return nil
+}
+
 type CoinbaseConfig struct {
-	ApiKeyName string `env:"CB_API_KEY,required"`
-	Secret     string `env:"CB_API_PRIVACY_KEY_B64,required"`
+	ApiKeyName string         `env:"CB_API_KEY,required"`
+	Secret     CoinbaseSecret `env:"CB_API_PRIVACY_KEY_B64,required"`
 }
 
 type SlackConfig struct {
@@ -55,8 +68,6 @@ func ConfigureApp() AppConfig {
 		log.Fatalf("Error mounting config: %v", err)
 	}
 
-	cfg.Coinbase.Secret = b64DecodeConfigVar(cfg.Coinbase.Secret, "cfg.Coinbase.Secret")
-
 	if cfg.EnableDebugLogs {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
@@ -76,7 +87,7 @@ func (c AppConfig) String() string {
 		"AppConfig(EnableDebugLogs: %t, Coinbase(ApiKeyName: %s, Secret: %s), Slack(WebhookID: %s) ShouldMakeMinTrades: %t, ForceSell: %t, ForceBuy: %t)",
 		c.EnableDebugLogs,
 		obfuscateSecret(c.Coinbase.ApiKeyName, 3),
-		obfuscateSecret(c.Coinbase.Secret, 5),
+		obfuscateSecret(string(c.Coinbase.Secret), 5),
 		obfuscateSecret(c.Slack.WebhookID, 12),
 		c.ShouldMakeMinTrades,
 		c.ForceSell,

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"log/slog"
 
@@ -26,7 +27,7 @@ func main() {
 			API: trading.NewCoinbaseAPI(
 				trading.CoinbaseAPIConfig{
 					KeyName: config.Coinbase.ApiKeyName,
-					Secret:  config.Coinbase.Secret,
+					Secret:  string(config.Coinbase.Secret),
 				},
 			),
 			TradeReporter: tradeReporter,
@@ -37,6 +38,7 @@ func main() {
 
 	if err != nil {
 		tradeReporter.ReportError(ctx, err)
+
 		slog.Error(err.Error())
 		log.Fatalf("Could not parse sentiment score, exiting.")
 		return
@@ -46,6 +48,11 @@ func main() {
 
 	if err != nil {
 		tradeReporter.ReportError(ctx, err)
+
+		if errors.Is(err, trading.ErrInsufficientEthGbp) {
+			return
+		}
+
 		log.Fatalf(err.Error())
 		return
 	}
