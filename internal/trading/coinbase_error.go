@@ -1,6 +1,7 @@
 package trading
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -37,3 +38,5 @@ func (e CreateOrderError) Error() string {
 
 	return fmt.Sprintf("failed to create coinbase order: `{ %s }`", strings.Join(errors, ", "))
 }
+
+var ErrInsufficientEthGbp = errors.New("`BuyEthGbp` cannot buy ETH due to insufficient GBP")

@@ -109,7 +109,7 @@ func (tm *TradeMaker) getPurchaseAmount(balance string) (string, error) {
 	floatBalance = math.Max(floatBalance, 0)
 
 	if floatBalance == 0 || floatBalance < minTradeAmount {
-		return "", errors.New("`BuyEthGbp` cannot buy ETH due to insufficient GBP")
+		return "", ErrInsufficientEthGbp
 	}
 
 	if tm.MakeMinTrades {
