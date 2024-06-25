@@ -40,16 +40,6 @@ type AppConfig struct {
 	ForceBuy            bool `env:"FORCE_BUY"`
 }
 
-func b64DecodeConfigVar(str string, fieldName string) string {
-	decoded, err := base64.StdEncoding.DecodeString(str)
-
-	if err != nil {
-		log.Fatalf("Could not decode %q: %s", fieldName, err.Error())
-	}
-
-	return string(decoded)
-}
-
 func ConfigureApp() AppConfig {
 	if os.Getenv("IS_REMOTE_ENVIRONMENT") == "" {
 		err := godotenv.Load()
