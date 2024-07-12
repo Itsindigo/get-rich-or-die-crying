@@ -31,6 +31,24 @@ func (tr *TradeReporter) ReportNoAction(ctx context.Context, score int) error {
 	return nil
 }
 
+func (tr *TradeReporter) ReportInsufficientFunds(ctx context.Context, score int) error {
+	message, err := GetInsufficientFundsMessageBlocks(score)
+
+	if err != nil {
+		return fmt.Errorf("could not create no action message: %w", err)
+	}
+
+	_, err = tr.Slack.SendMessage(ctx, message)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GeInsufficientFundsMessageBlocks
+
 func (tr *TradeReporter) ReportSale(ctx context.Context, amount string) error {
 	message, err := GetSaleMadeMessageBlocks(amount)
 

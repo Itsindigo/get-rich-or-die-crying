@@ -47,11 +47,12 @@ func main() {
 	err = tm.Act(ctx, trading.ActOptions{FearAndGreedScore: score, ForceSell: config.ForceSell, ForceBuy: config.ForceBuy})
 
 	if err != nil {
-		tradeReporter.ReportError(ctx, err)
-
 		if errors.Is(err, trading.ErrInsufficientEthGbp) {
+			tradeReporter.ReportInsufficientFunds(ctx, score)
 			return
 		}
+
+		tradeReporter.ReportError(ctx, err)
 
 		log.Fatalf(err.Error())
 		return
