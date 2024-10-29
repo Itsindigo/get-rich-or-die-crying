@@ -53,8 +53,8 @@ func main() {
 		}
 
 		tradeReporter.ReportError(ctx, err)
-
 		log.Fatalf(err.Error())
+
 		return
 	}
 

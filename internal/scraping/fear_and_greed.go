@@ -14,7 +14,7 @@ func ParseSentimentScore() (int, error) {
 
 	var htmlScore string
 
-	c.OnHTML("a[href='/charts/#fear-and-greed-index']", func(el *colly.HTMLElement) {
+	c.OnHTML("a[href='/charts/fear-and-greed-index/']", func(el *colly.HTMLElement) {
 		children := el.DOM.Children().Nodes
 
 		if len(children) == 0 {
@@ -24,6 +24,7 @@ func ParseSentimentScore() (int, error) {
 
 		// Take first child of first link element:
 		linkElement := children[0]
+
 		if linkElement.FirstChild.Data == "" {
 			slog.Warn("Did not find score text in fear and greed URL")
 			return
